@@ -67,3 +67,33 @@ type Query {
   
   user(email: String!): User
 }
+
+input AnnonceInput {
+  titre: String!
+  typeBien: TypeBien!
+  statutPublication: StatutPublication!
+  statutBien: StatutBien!
+  description: String!
+  prix: Float!
+  dateDisponibilite: String!
+  photos: [String]
+}
+
+input QuestionInput {
+  contenu: String!
+}
+
+input ReponseInput {
+  contenu: String!
+}
+
+type Mutation {
+  createAnnonce(input: AnnonceInput!): Annonce!
+  updateAnnonce(id: ID!, input: AnnonceInput!): Annonce!
+  deleteAnnonce(id: ID!): Boolean!
+  
+  addQuestion(annonceId: ID!, input: QuestionInput!): Question!
+  addReponse(annonceId: ID!, questionId: ID!, input: ReponseInput!): Reponse!
+  
+  createUser(email: String!, name: String!, password: String!, role: UserRole!): User!
+}
