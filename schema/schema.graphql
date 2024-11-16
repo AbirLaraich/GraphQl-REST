@@ -52,3 +52,18 @@ type Reponse {
   dateReponse: String!
   reponduPar: User
 }
+
+type Query {
+  annonces(
+    typeBien: TypeBien
+    statutBien: StatutBien
+    prixMin: Float
+    prixMax: Float
+  ): [Annonce]!
+  
+  annonce(id: ID!): Annonce
+  
+  questions(annonceId: ID!): [Question]!
+  
+  user(email: String!): User
+}
