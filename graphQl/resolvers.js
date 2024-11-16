@@ -20,7 +20,31 @@ const resolvers = {
       return annonce ? annonce.questions : [];
     },
     user: async (_, { email }) => await User.findOne({ email }),
-  }
+  },
+  Mutation: {
+    createAnnonce: async (_, { input }) => await Annonce.create(input),
+    updateAnnonce: async (_, { id, input }) => await Annonce.findByIdAndUpdate(id, input, { new: true }),
+    deleteAnnonce: async (_, { id }) => {
+      await Annonce.findByIdAndDelete(id);
+      return true;
+    },
+    addQuestion: async (_, { annonceId, input }) => {
+      const annonce = await Annonce.findById(annonceId);
+      annonce.questions.push(input);
+      await annonce.save();
+      return annonce.questions[annonce.questions.length - 1];
+    },
+    addReponse: async (_, { annonceId, questionId, input }) => {
+      const annonce = await Annonce.findById(annonceId);
+      const question = annonce.questions.id(questionId);
+      question.reponses.push(input);
+      await annonce.save();
+      return question.reponses[question.reponses.length - 1];
+    },
+    createUser: async (_, { email, name, password, role }) => {
+      return await User.create({ email, name, password, role });
+    },
+  },
 };
 
 module.exports = resolvers;
