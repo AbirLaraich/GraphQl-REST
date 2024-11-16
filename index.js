@@ -8,13 +8,21 @@ const annoncesRoutes = require('./routes/AnnonceRoute');
 const usersRoutes = require('./routes/UserRoute');
 const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
-const configureGraphQLServer = require('./graphQl/graphqlServer');
+const { createHandler } = require('graphql-http/lib/use/express');
+const { makeExecutableSchema } = require('@graphql-tools/schema');
+const fs = require('fs');
+const path = require('path');
+const graphqlPlayground = require('graphql-playground-middleware-express').default;  
+const typeDefs = fs.readFileSync(path.join(__dirname, 'graphQl', 'schema.graphql'), 'utf-8');
+const resolvers = require('./graphQl/resolvers');
+const verifyToken = require('./middleware/verifyToken');
+const { graphqlHTTP } = require('express-graphql');
 
 require('dotenv').config();
+
 connectDB();
 
 const app = express();
-
 const swaggerDocument = YAML.load('api/openapi.yaml');
 
 passport.use(new GoogleStrategy({
@@ -40,18 +48,34 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-
-app.get('/auth/google/callback', 
+app.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
     res.json({ message: 'Authentification réussie', token: req.user.token });
   }
 );
 
-app.use('/', annoncesRoutes); 
-app.use('/', usersRoutes); 
+app.use('/', annoncesRoutes);
+app.use('/', usersRoutes);
 
-configureGraphQLServer(app);
+const schema = makeExecutableSchema({
+  typeDefs,
+  resolvers,
+});
+
+app.use('/graphql',
+  verifyToken,
+  createHandler({
+    schema: schema,
+    context: (req) => ({
+      user: req.raw.user
+    })
+  })
+);
+
+app.get('/playground', graphqlPlayground({
+  endpoint: '/graphql' 
+}));
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
@@ -62,5 +86,6 @@ app.use((err, req, res, next) => {
 
 const serverPort = process.env.PORT || 8080;
 app.listen(serverPort, () => {
-  console.log('Serveur démarré sur http://localhost:' + serverPort);
+  console.log(`Serveur démarré sur http://localhost:${serverPort}`);
+  console.log(`GraphQL Playground disponible sur http://localhost:${serverPort}/playground`);
 });
