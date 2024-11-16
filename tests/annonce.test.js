@@ -1,19 +1,23 @@
-const request = require("supertest");
-const express = require("express");
-const { graphqlHTTP } = require("express-graphql");
-const { makeExecutableSchema } = require("@graphql-tools/schema");
-const fs = require("fs");
-const path = require("path");
-const verifyToken = require("../middleware/verifyToken");
+const request = require('supertest');
+const express = require('express');
+const { graphqlHTTP } = require('express-graphql');
+const { makeExecutableSchema } = require('@graphql-tools/schema');
+const fs = require('fs');
+const path = require('path');
+const jwt = require('jsonwebtoken');
+const verifyToken = require('../middleware/verifyToken');
 
-const typeDefs = fs.readFileSync(
-  path.join(__dirname, "../graphQl", "schema.graphql"),
-  "utf-8"
-);
-const resolvers = require("../graphQl/resolvers");
+const typeDefs = fs.readFileSync(path.join(__dirname, '../graphQl', 'schema.graphql'), 'utf-8');
+const resolvers = require('../graphQl/resolvers');
 
-const AnnonceService = require("../service/AnnoncesService");
+const AnnonceService = require('../service/AnnoncesService');
+const userService = require('../service/UsersService');
 
+const mockUser = {
+  id: '67377b320a88c40a626a5cb3',
+  email: 'laraich.abir2002@gmail.com',
+  role: 'agent'
+};
 jest.mock("../service/AnnoncesService");
 jest.mock("../service/UsersService");
 jest.mock("jsonwebtoken");
@@ -97,5 +101,69 @@ describe("GraphQL Integration Tests", () => {
       expect(response.body.errors).toBeUndefined();
       expect(response.body.data.annonce).toEqual(mockAnnonce);
     });
+  });
+  describe('Protected Mutations', () => {
+    describe('With Agent Role', () => {
+      beforeEach(() => {
+        jwt.verify.mockImplementation(() => ({ email: mockUser.email }));
+        userService.getUserByEmail.mockResolvedValue(mockUser);
+      });
+
+      it('should create a new annonce successfully', async () => {
+        const mockNewAnnonce = {
+          id: '1',
+          titre: 'Nouvelle annonce',
+          description: 'Une belle annonce',
+          prix: 1200,
+          statutPublication: 'publiee',
+          typeBien: 'vente',
+          statutBien: 'disponible',
+          photos: ['photo1.jpg', 'photo2.jpg']
+        };
+
+        AnnonceService.createAnnonce.mockResolvedValue(mockNewAnnonce);
+
+        const response = await request(app)
+          .post('/graphql')
+          .set('Authorization', 'Bearer valid-token')
+          .send({
+            query: `
+              mutation {
+                createAnnonce(input: {
+                  titre: "Nouvelle annonce"
+                  description: "Une belle annonce"
+                  prix: 1200
+                  statutPublication: publiee
+                  dateDisponibilite: "2024-12-01"
+                  typeBien: vente
+                  statutBien: disponible
+                  photos: ["photo1.jpg", "photo2.jpg"]
+                }) {
+                  success
+                  message
+                  annonce {
+                    id
+                    titre
+                    prix
+                    description
+                    statutPublication
+                    typeBien
+                    statutBien
+                    photos
+                  }
+                }
+              }
+            `
+          });
+
+        expect(response.status).toBe(200);
+        expect(response.body.errors).toBeUndefined();
+        expect(response.body.data.createAnnonce).toEqual({
+          success: true,
+          message: "Annonce créée avec succès",
+          annonce: mockNewAnnonce
+        });
+      });
+    });                
   });
 });
