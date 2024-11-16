@@ -24,19 +24,19 @@ type Annonce {
 }
 
 enum TypeBien {
-  VENTE
-  LOCATION
+  vente
+  location
 }
 
 enum StatutPublication {
-  PUBLIEE
-  NON_PUBLIEE
+  publiee
+  non_publiee
 }
 
 enum StatutBien {
-  DISPONIBLE
-  LOUE
-  VENDU
+  disponible
+  loue
+  vendu
 }
 
 type Question {
