@@ -176,6 +176,7 @@ describe("User GraphQL Integration Tests", () => {
         expect(response.body.data.user).toEqual(targetUser);
       });
     });
+
     it("should return null for non-existent user", async () => {
       userService.getUserByEmail.mockImplementation((email) => {
         if (email === mockAgent.email) return mockAgent;
@@ -201,6 +202,29 @@ describe("User GraphQL Integration Tests", () => {
       expect(response.status).toBe(200);
       expect(response.body.errors).toBeUndefined();
       expect(response.body.data.user).toBeNull();
+    });
+    describe("Without Authentication", () => {
+      it("should not allow access to user query", async () => {
+        const response = await request(app)
+          .post("/graphql")
+          .send({
+            query: `
+                query {
+                  user(email: "test@example.com") {
+                    id
+                    email
+                    name
+                    role
+                  }
+                }
+              `,
+          });
+
+        expect(response.status).toBe(403);
+        expect(response.body.errors[0].message).toBe(
+          "Cette opération nécessite une authentification"
+        );
+      });
     });
   });
 });
