@@ -52,7 +52,7 @@ type Reponse {
   id: ID!
   contenu: String!
   dateReponse: String!
-  reponduPar: User
+  reponduPar: String!
 }
 
 type Query {
