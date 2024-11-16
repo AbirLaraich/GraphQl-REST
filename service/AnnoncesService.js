@@ -1,6 +1,6 @@
 'use strict';
 const Annonce = require('../models/AnnonceModel');
-
+const mongoose = require('mongoose');
 
 /**
  * Créer une nouvelle annonce
@@ -117,21 +117,26 @@ exports.updateAnnonce = function(body, id) {
 exports.addQuestion = async (annonceId, contenu) => {
   try {
     const annonce = await Annonce.findById(annonceId);
-
     if (!annonce) {
       throw new Error('Annonce non trouvée');
     }
 
     const newQuestion = {
+      _id: new mongoose.Types.ObjectId(),
       contenu: contenu,
       datePosee: new Date(),
-      reponses: []  
+      reponses: []
     };
 
     annonce.questions.push(newQuestion);
-
     await annonce.save();
-    return newQuestion; 
+
+    return {
+      id: newQuestion._id.toString(), 
+      contenu: newQuestion.contenu,
+      datePosee: newQuestion.datePosee,
+      reponses: newQuestion.reponses
+    };
   } catch (error) {
     throw new Error(error.message);
   }

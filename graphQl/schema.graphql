@@ -15,14 +15,28 @@ enum UserRole {
 type Annonce {
   id: ID!
   titre: String!
-  typeBien: TypeBien!
-  statutPublication: StatutPublication!
-  statutBien: StatutBien!
-  description: String!
+  description: String
   prix: Float!
+  statutPublication: StatutPublication!
   dateDisponibilite: Date!
+  typeBien: TypeBien!
+  statutBien: StatutBien!
   photos: [String]
   questions: [Question]
+}
+
+type Question {
+  id: ID!
+  contenu: String!
+  datePosee: Date!
+  reponses: [Reponse]
+}
+
+type Reponse {
+  id: ID!
+  contenu: String!
+  dateReponse: Date!
+  reponduPar: String!
 }
 
 enum TypeBien {
@@ -41,18 +55,9 @@ enum StatutBien {
   vendu
 }
 
-type Question {
-  id: ID!
-  contenu: String!
-  datePosee: String!
-  reponses: [Reponse]
-}
-
-type Reponse {
-  id: ID!
-  contenu: String!
-  dateReponse: String!
-  reponduPar: String!
+interface MutationResponse {
+  success: Boolean!
+  message: String
 }
 
 type Query {
@@ -72,12 +77,12 @@ type Query {
 
 input AnnonceInput {
   titre: String!
-  typeBien: TypeBien!
-  statutPublication: StatutPublication!
-  statutBien: StatutBien!
-  description: String!
+  description: String
   prix: Float!
+  statutPublication: StatutPublication!
   dateDisponibilite: Date!
+  typeBien: TypeBien!
+  statutBien: StatutBien!
   photos: [String]
 }
 
@@ -89,13 +94,84 @@ input ReponseInput {
   contenu: String!
 }
 
+type AnnonceResponse implements MutationResponse {
+  success: Boolean!
+  message: String
+  annonce: Annonce
+}
+
+type QuestionResponse implements MutationResponse {
+  success: Boolean!
+  message: String
+  question: Question
+}
+
+type ReponseResponse implements MutationResponse {
+  success: Boolean!
+  message: String
+  reponse: Reponse
+}
+
+type UserResponse implements MutationResponse {
+  success: Boolean!
+  message: String
+  user: User
+}
+
+type DeleteAnnonceResponse implements MutationResponse {
+  success: Boolean!
+  message: String
+}
+
 type Mutation {
-  createAnnonce(input: AnnonceInput!): Annonce!
-  updateAnnonce(id: ID!, input: AnnonceInput!): Annonce!
-  deleteAnnonce(id: ID!): Boolean!
+  createAnnonce(input: AnnonceInput!): AnnonceResponse! @auth(requires: agent)
+  updateAnnonce(id: ID!, input: AnnonceInput!): AnnonceResponse! @auth(requires: agent)
+  deleteAnnonce(id: ID!): DeleteAnnonceResponse! @auth(requires: agent)
+
+  addQuestion(annonceId: ID!, input: QuestionInput!): QuestionResponse!
+  addReponse(annonceId: ID!, questionId: ID!, input: ReponseInput!): ReponseResponse! @auth(requires: agent)
   
-  addQuestion(annonceId: ID!, input: QuestionInput!): Question!
-  addReponse(annonceId: ID!, questionId: ID!, input: ReponseInput!): Reponse!
-  
-  createUser(email: String!, name: String!, password: String!, role: UserRole!): User!
+  createUser(
+    email: String!
+    password: String!
+    name: String!
+    role: UserRole!
+  ): UserResponse!
+}
+
+directive @auth(
+  requires: UserRole!
+) on FIELD_DEFINITION
+
+directive @include(
+  if: Boolean!
+) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+
+directive @skip(
+  if: Boolean!
+) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+
+directive @deprecated(
+  reason: String
+) on FIELD_DEFINITION | ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | ENUM_VALUE
+
+directive @specifiedBy(
+  url: String
+) on SCALAR
+
+fragment AnnonceDetails on Annonce {
+  id
+  titre
+  description
+  prix
+  typeBien
+  statutBien
+  statutPublication
+  dateDisponibilite
+}
+
+union SearchResult = Annonce | User
+
+type SearchQuery {
+  search(query: String!): [SearchResult] @deprecated(reason: "Utiliser la nouvelle API de recherche")
 }
