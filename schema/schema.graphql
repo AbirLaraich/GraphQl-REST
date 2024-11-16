@@ -1,0 +1,99 @@
+type User {
+  id: ID!
+  email: String!
+  name: String!
+  role: UserRole!
+}
+
+enum UserRole {
+  CLIENT
+  AGENT
+}
+
+type Annonce {
+  id: ID!
+  titre: String!
+  typeBien: TypeBien!
+  statutPublication: StatutPublication!
+  statutBien: StatutBien!
+  description: String!
+  prix: Float!
+  dateDisponibilite: String!
+  photos: [String]
+  questions: [Question]
+}
+
+enum TypeBien {
+  VENTE
+  LOCATION
+}
+
+enum StatutPublication {
+  PUBLIEE
+  NON_PUBLIEE
+}
+
+enum StatutBien {
+  DISPONIBLE
+  LOUE
+  VENDU
+}
+
+type Question {
+  id: ID!
+  contenu: String!
+  datePosee: String!
+  reponses: [Reponse]
+}
+
+type Reponse {
+  id: ID!
+  contenu: String!
+  dateReponse: String!
+  reponduPar: User
+}
+
+type Query {
+  annonces(
+    typeBien: TypeBien
+    statutBien: StatutBien
+    prixMin: Float
+    prixMax: Float
+  ): [Annonce]!
+  
+  annonce(id: ID!): Annonce
+  
+  questions(annonceId: ID!): [Question]!
+  
+  user(email: String!): User
+}
+
+input AnnonceInput {
+  titre: String!
+  typeBien: TypeBien!
+  statutPublication: StatutPublication!
+  statutBien: StatutBien!
+  description: String!
+  prix: Float!
+  dateDisponibilite: String!
+  photos: [String]
+}
+
+input QuestionInput {
+  contenu: String!
+}
+
+input ReponseInput {
+  contenu: String!
+}
+
+type Mutation {
+  createAnnonce(input: AnnonceInput!): Annonce!
+  updateAnnonce(id: ID!, input: AnnonceInput!): Annonce!
+  deleteAnnonce(id: ID!): Boolean!
+  
+  addQuestion(annonceId: ID!, input: QuestionInput!): Question!
+  addReponse(annonceId: ID!, questionId: ID!, input: ReponseInput!): Reponse!
+  
+  createUser(email: String!, name: String!, password: String!, role: UserRole!): User!
+}
