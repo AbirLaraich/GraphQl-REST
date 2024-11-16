@@ -9,3 +9,46 @@ enum UserRole {
   CLIENT
   AGENT
 }
+
+type Annonce {
+  id: ID!
+  titre: String!
+  typeBien: TypeBien!
+  statutPublication: StatutPublication!
+  statutBien: StatutBien!
+  description: String!
+  prix: Float!
+  dateDisponibilite: String!
+  photos: [String]
+  questions: [Question]
+}
+
+enum TypeBien {
+  VENTE
+  LOCATION
+}
+
+enum StatutPublication {
+  PUBLIEE
+  NON_PUBLIEE
+}
+
+enum StatutBien {
+  DISPONIBLE
+  LOUE
+  VENDU
+}
+
+type Question {
+  id: ID!
+  contenu: String!
+  datePosee: String!
+  reponses: [Reponse]
+}
+
+type Reponse {
+  id: ID!
+  contenu: String!
+  dateReponse: String!
+  reponduPar: User
+}
