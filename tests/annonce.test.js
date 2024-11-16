@@ -164,6 +164,54 @@ describe("GraphQL Integration Tests", () => {
           annonce: mockNewAnnonce
         });
       });
-    });                
+    });   
+    
+    describe('With User Role', () => {
+        beforeEach(() => {
+          jwt.verify.mockImplementation(() => ({ email: 'user@example.com' }));
+          userService.getUserByEmail.mockResolvedValue({ 
+            id: '2',
+            email: 'user@example.com',
+            role: 'user'
+          });
+        });
+  
+        it('should not allow annonce creation', async () => {
+          const response = await request(app)
+            .post('/graphql')
+            .set('Authorization', 'Bearer valid-token')
+            .send({
+              query: `
+                mutation {
+                  createAnnonce(input: {
+                    titre: "Nouvelle annonce"
+                    description: "Une belle annonce"
+                    prix: 1200
+                    statutPublication: publiee
+                    dateDisponibilite: "2024-12-01"
+                    typeBien: vente
+                    statutBien: disponible
+                    photos: ["photo1.jpg", "photo2.jpg"]
+                  }) {
+                    success
+                    message
+                    annonce {
+                      id
+                      titre
+                    }
+                  }
+                }
+              `
+            });
+  
+          expect(response.status).toBe(200);
+          expect(response.body.data.createAnnonce).toEqual({
+            success: false,
+            message: "Seuls les agents peuvent créer des annonces",
+            annonce: null
+          });
+          expect(AnnonceService.createAnnonce).not.toHaveBeenCalled();
+        });
+      });  
   });
 });
