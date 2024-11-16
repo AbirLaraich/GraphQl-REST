@@ -213,5 +213,37 @@ describe("GraphQL Integration Tests", () => {
           expect(AnnonceService.createAnnonce).not.toHaveBeenCalled();
         });
       });  
+      describe('Without Authentication', () => {
+        it('should not allow protected mutations', async () => {
+          const response = await request(app)
+            .post('/graphql')
+            .send({
+              query: `
+                mutation {
+                  createAnnonce(input: {
+                    titre: "Nouvelle annonce"
+                    description: "Une belle annonce"
+                    prix: 1200
+                    statutPublication: publiee
+                    dateDisponibilite: "2024-12-01"
+                    typeBien: vente
+                    statutBien: disponible
+                    photos: ["photo1.jpg", "photo2.jpg"]
+                  }) {
+                    success
+                    message
+                    annonce {
+                      id
+                      titre
+                    }
+                  }
+                }
+              `
+            });
+  
+          expect(response.status).toBe(403);
+          expect(response.body.errors[0].message).toBe('Cette opération nécessite une authentification');
+        });
+      });
+    });
   });
-});
