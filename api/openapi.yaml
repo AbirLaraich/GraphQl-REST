@@ -10,21 +10,21 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: 1.0.0
 servers:
-- url: http://localhost:8080
+  - url: http://localhost:8080
 tags:
-- name: users
-  description: Opérations relatives aux utilisateurs.
-- name: annonces
-  description: Opérations relatives aux annonces.
-- name: questions
-  description: Opérations relatives aux questions posées sur les annonces.
-- name: reponses
-  description: Opérations relatives aux réponses des agents immobiliers.
+  - name: users
+    description: Opérations relatives aux utilisateurs.
+  - name: annonces
+    description: Opérations relatives aux annonces.
+  - name: questions
+    description: Opérations relatives aux questions posées sur les annonces.
+  - name: reponses
+    description: Opérations relatives aux réponses des agents immobiliers.
 paths:
   /user:
     post:
       tags:
-      - users
+        - users
       summary: Créer un nouvel utilisateur
       description: "Permet à tout utilisateur, même non connecté, de créer un compte."
       operationId: createUser
@@ -55,20 +55,20 @@ paths:
   /users/{email}:
     get:
       tags:
-      - users
+        - users
       summary: Récupérer les informations d'un utilisateur par e-mail
       description: Récupère les détails d'un utilisateur en fonction de son adresse e-mail.
       operationId: getUserByEmail
       parameters:
-      - name: email
-        in: path
-        description: Adresse e-mail de l'utilisateur à récupérer
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-          format: email
+        - name: email
+          in: path
+          description: Adresse e-mail de l'utilisateur à récupérer
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: email
       responses:
         "200":
           description: Informations de l'utilisateur récupérées avec succès
@@ -84,7 +84,7 @@ paths:
   /annonce:
     post:
       tags:
-      - annonces
+        - annonces
       summary: Créer une nouvelle annonce
       description: Permet à un agent immobilier de créer une annonce. Nécessite authentification via Bearer token.
       operationId: createAnnonce
@@ -97,7 +97,7 @@ paths:
             example:
               titre: Appartement à louer
               typeBien: location
-              statutPublication: publiée
+              statutPublication: publiee
               statutBien: disponible
               description: Appartement lumineux en centre-ville
               prix: 1000
@@ -118,7 +118,7 @@ paths:
   /annonces:
     get:
       tags:
-      - annonces
+        - annonces
       summary: Récupérer toutes les annonces
       description: Récupère la liste de toutes les annonces disponibles.
       operationId: getAllAnnonces
@@ -138,19 +138,19 @@ paths:
   /annonces/{id}:
     get:
       tags:
-      - annonces
+        - annonces
       summary: Récupérer une annonce par ID
       description: Récupère les détails d'une annonce spécifique.
       operationId: getAnnonceById
       parameters:
-      - name: id
-        in: path
-        description: ID de l'annonce à récupérer
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: id
+          in: path
+          description: ID de l'annonce à récupérer
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: Annonce récupérée avec succès
@@ -163,19 +163,19 @@ paths:
       x-swagger-router-controller: Annonces
     put:
       tags:
-      - annonces
+        - annonces
       summary: Modifier une annonce
       description: Permet à un agent de modifier une annonce existante. Nécessite authentification via Bearer token.
       operationId: updateAnnonce
       parameters:
-      - name: id
-        in: path
-        description: ID de l'annonce à modifier
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: id
+          in: path
+          description: ID de l'annonce à modifier
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       requestBody:
         description: Objet annonce modifié
         content:
@@ -195,19 +195,19 @@ paths:
       x-swagger-router-controller: Annonces
     delete:
       tags:
-      - annonces
+        - annonces
       summary: Supprimer une annonce
       description: Permet à un agent de supprimer une annonce. Nécessite authentification via Bearer token.
       operationId: deleteAnnonce
       parameters:
-      - name: id
-        in: path
-        description: ID de l'annonce à supprimer
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: id
+          in: path
+          description: ID de l'annonce à supprimer
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "204":
           description: Annonce supprimée avec succès
@@ -219,19 +219,19 @@ paths:
   /annonces/{id}/questions:
     post:
       tags:
-      - questions
+        - questions
       summary: Poser une question sur une annonce
       description: Permet à un utilisateur connecté de poser une question. Nécessite authentification via Bearer token.
       operationId: addQuestion
       parameters:
-      - name: id
-        in: path
-        description: ID de l'annonce concernée
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: id
+          in: path
+          description: ID de l'annonce concernée
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       requestBody:
         description: Contenu de la question posée
         content:
@@ -254,27 +254,27 @@ paths:
   /annonces/{id}/questions/{questionId}/reponses:
     post:
       tags:
-      - reponses
+        - reponses
       summary: Répondre à une question sur une annonce
       description: Permet à un agent immobilier de répondre à une question. Nécessite authentification via Bearer token.
       operationId: addReponse
       parameters:
-      - name: id
-        in: path
-        description: ID de l'annonce concernée
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-      - name: questionId
-        in: path
-        description: ID de la question à laquelle répondre
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: id
+          in: path
+          description: ID de l'annonce concernée
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: questionId
+          in: path
+          description: ID de la question à laquelle répondre
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       requestBody:
         description: Contenu de la réponse donnée par l'agent
         content:
@@ -298,10 +298,10 @@ components:
   schemas:
     User:
       required:
-      - email
-      - name
-      - password
-      - role
+        - email
+        - name
+        - password
+        - role
       type: object
       properties:
         id:
@@ -316,8 +316,8 @@ components:
         role:
           type: string
           enum:
-          - client
-          - agent
+            - client
+            - agent
       example:
         password: password
         role: client
@@ -326,13 +326,13 @@ components:
         email: ""
     Annonce:
       required:
-      - dateDisponibilite
-      - description
-      - prix
-      - statutBien
-      - statutPublication
-      - titre
-      - typeBien
+        - dateDisponibilite
+        - description
+        - prix
+        - statutBien
+        - statutPublication
+        - titre
+        - typeBien
       type: object
       properties:
         id:
@@ -342,19 +342,19 @@ components:
         typeBien:
           type: string
           enum:
-          - vente
-          - location
+            - vente
+            - location
         statutPublication:
           type: string
           enum:
-          - publiée
-          - non publiée
+            - publiee
+            - non publiee
         statutBien:
           type: string
           enum:
-          - disponible
-          - loué
-          - vendu
+            - disponible
+            - loue
+            - vendu
         description:
           type: string
         prix:
@@ -371,18 +371,18 @@ components:
       example:
         prix: 0.8008282
         titre: titre
-        statutPublication: publiée
+        statutPublication: publiee
         description: description
         dateDisponibilite: 2000-01-23
         id: id
         typeBien: vente
         statutBien: disponible
         photos:
-        - http://example.com/aeiou
-        - http://example.com/aeiou
+          - http://example.com/aeiou
+          - http://example.com/aeiou
     QuestionInput:
       required:
-      - contenu
+        - contenu
       type: object
       properties:
         contenu:
@@ -390,8 +390,8 @@ components:
           description: Contenu de la question posée par l'utilisateur
     Question:
       required:
-      - contenu
-      - datePosee
+        - contenu
+        - datePosee
       type: object
       properties:
         id:
@@ -403,7 +403,7 @@ components:
           format: date-time
     ReponseInput:
       required:
-      - contenu
+        - contenu
       type: object
       properties:
         contenu:
@@ -411,8 +411,8 @@ components:
           description: Contenu de la réponse donnée par l'agent immobilier
     Reponse:
       required:
-      - contenu
-      - dateReponse
+        - contenu
+        - dateReponse
       type: object
       properties:
         id:

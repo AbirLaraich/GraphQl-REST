@@ -8,6 +8,7 @@ const annoncesRoutes = require('./routes/AnnonceRoute');
 const usersRoutes = require('./routes/UserRoute');
 const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
+const configureGraphQLServer = require('./graphQl/graphqlServer');
 
 require('dotenv').config();
 connectDB();
@@ -49,6 +50,8 @@ app.get('/auth/google/callback',
 
 app.use('/', annoncesRoutes); 
 app.use('/', usersRoutes); 
+
+configureGraphQLServer(app);
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
