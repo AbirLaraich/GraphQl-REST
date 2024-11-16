@@ -176,5 +176,31 @@ describe("User GraphQL Integration Tests", () => {
         expect(response.body.data.user).toEqual(targetUser);
       });
     });
+    it("should return null for non-existent user", async () => {
+      userService.getUserByEmail.mockImplementation((email) => {
+        if (email === mockAgent.email) return mockAgent;
+        return null;
+      });
+
+      const response = await request(app)
+        .post("/graphql")
+        .set("Authorization", "Bearer valid-token")
+        .send({
+          query: `
+              query {
+                user(email: "nonexistent@example.com") {
+                  id
+                  email
+                  name
+                  role
+                }
+              }
+            `,
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.errors).toBeUndefined();
+      expect(response.body.data.user).toBeNull();
+    });
   });
 });
