@@ -1,0 +1,32 @@
+{
+  "name": "api-gestion-annonces-immobili-res",
+  "version": "1.0.0",
+  "description": "API REST pour la gestion des annonces immobilières, incluant la création, modification, et consultation des annonces et des utilisateurs, avec gestion des questions et réponses.",
+  "main": "index.js",
+  "scripts": {
+    "prestart": "npm install",
+    "start": "nodemon index.js"
+  },
+  "keywords": [
+    "swagger"
+  ],
+  "license": "Unlicense",
+  "private": true,
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "connect": "^3.2.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "express-session": "^1.18.1",
+    "js-yaml": "^3.3.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.8.1",
+    "oas3-tools": "^2.2.3",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "passport-http-bearer": "^1.0.1",
+    "passport-oauth2": "^1.8.0",
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0"
+  }
+}

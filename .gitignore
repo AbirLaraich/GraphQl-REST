@@ -1,0 +1,28 @@
+# Node.js
+node_modules/
+/dist
+package-lock.json
+
+# Logs
+logs/
+*.log
+
+# Environment variables
+.env
+
+# Build outputs
+/dist/
+/build/
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# IDE files
+.vscode/
