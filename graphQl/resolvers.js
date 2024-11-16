@@ -7,30 +7,37 @@ const resolvers = {
     name: "Date",
     description: "A custom scalar type for Date",
     serialize(value) {
-      return value.toISOString(); 
+      return value.toISOString();
     },
     parseValue(value) {
-      return new Date(value); 
+      return new Date(value);
     },
     parseLiteral(ast) {
       if (ast.kind === Kind.STRING) {
-        return new Date(ast.value); 
+        return new Date(ast.value);
       }
       return null;
     }
   }),
+
   Query: {
     annonces: async (_, args) => {
-      const { typeBien, statutBien, statutPublication, prixMin, prixMax } =
-        args;
+      const { typeBien, statutBien, statutPublication, prixMin, prixMax } = args;
       let annonces = await AnnonceService.getAllAnnonces();
-
+      
       if (prixMin !== undefined) {
         annonces = annonces.filter((a) => a.prix >= prixMin);
       }
       if (prixMax !== undefined) {
         annonces = annonces.filter((a) => a.prix <= prixMax);
       }
+      if (typeBien !== undefined) {
+        annonces = annonces.filter((a) => a.typeBien === typeBien);
+      }
+      if (statutBien !== undefined) {
+        annonces = annonces.filter((a) => a.statutBien === statutBien);
+      }
+      
       return annonces;
     },
 
@@ -46,52 +53,176 @@ const resolvers = {
       return await UserService.getUserByEmail(email);
     }
   },
+
+  MutationResponse: {
+    __resolveType(obj, context, info) {
+      if (obj.annonce) return 'AnnonceResponse';
+      if (obj.question) return 'QuestionResponse';
+      if (obj.reponse) return 'ReponseResponse';
+      if (obj.user) return 'UserResponse';
+      if (!obj.annonce && !obj.question && !obj.reponse && !obj.user) return 'DeleteAnnonceResponse';
+      return null;
+    }
+  },
+
   Mutation: {
     createAnnonce: async (_, { input }, context) => {
-      if (!context.user || context.user.role !== "agent") {
-        throw new Error("Seuls les agents peuvent créer des annonces");
+      try {
+        if (!context.user || context.user.role !== "agent") {
+          throw new Error("Seuls les agents peuvent créer des annonces");
+        }
+        
+        const annonce = await AnnonceService.createAnnonce({
+          ...input,
+          dateDisponibilite: new Date(input.dateDisponibilite)
+        });
+
+        return {
+          success: true,
+          message: "Annonce créée avec succès",
+          annonce
+        };
+      } catch (error) {
+        return {
+          success: false,
+          message: error.message,
+          annonce: null
+        };
       }
-      input.dateDisponibilite = new Date(input.dateDisponibilite);
-      return await AnnonceService.createAnnonce(input);
     },
 
     updateAnnonce: async (_, { id, input }, context) => {
-      if (!context.user || context.user.role !== "agent") {
-        throw new Error("Seuls les agents peuvent modifier des annonces");
+      try {
+        if (!context.user || context.user.role !== "agent") {
+          throw new Error("Seuls les agents peuvent modifier des annonces");
+        }
+
+        const annonce = await AnnonceService.updateAnnonce({
+          ...input,
+          dateDisponibilite: new Date(input.dateDisponibilite)
+        }, id);
+
+        return {
+          success: true,
+          message: "Annonce mise à jour avec succès",
+          annonce
+        };
+      } catch (error) {
+        return {
+          success: false,
+          message: error.message,
+          annonce: null
+        };
       }
-      input.dateDisponibilite = new Date(input.dateDisponibilite);
-      return await AnnonceService.updateAnnonce(input, id);
     },
 
     deleteAnnonce: async (_, { id }, context) => {
-      if (!context.user || context.user.role !== "agent") {
-        throw new Error("Seuls les agents peuvent supprimer des annonces");
+      try {
+        if (!context.user || context.user.role !== "agent") {
+          throw new Error("Seuls les agents peuvent supprimer des annonces");
+        }
+
+        await AnnonceService.deleteAnnonce(id);
+        return {
+          success: true,
+          message: "Annonce supprimée avec succès"
+        };
+      } catch (error) {
+        return {
+          success: false,
+          message: error.message
+        };
       }
-      await AnnonceService.deleteAnnonce(id);
-      return true;
     },
 
     addQuestion: async (_, { annonceId, input }, context) => {
-      if (!context.user) {
-        throw new Error("Vous devez être connecté pour poser une question");
+      try {
+        if (!context.user) {
+          throw new Error("Vous devez être connecté pour poser une question");
+        }
+
+        const question = await AnnonceService.addQuestion(annonceId, input.contenu);
+        console.log(question)
+        return {
+          success: true,
+          message: "Question ajoutée avec succès",
+          question
+        };
+      } catch (error) {
+        return {
+          success: false,
+          message: error.message,
+          question: null
+        };
       }
-      return await AnnonceService.addQuestion(annonceId, input.contenu);
     },
 
     addReponse: async (_, { annonceId, questionId, input }, context) => {
-      if (!context.user || context.user.role !== "agent") {
-        throw new Error("Seuls les agents peuvent répondre aux questions");
+      try {
+        if (!context.user || context.user.role !== "agent") {
+          throw new Error("Seuls les agents peuvent répondre aux questions");
+        }
+
+        const reponse = await AnnonceService.addReponse(
+          annonceId,
+          questionId,
+          input.contenu,
+          context.user.id
+        );
+
+        return {
+          success: true,
+          message: "Réponse ajoutée avec succès",
+          reponse
+        };
+      } catch (error) {
+        return {
+          success: false,
+          message: error.message,
+          reponse: null
+        };
       }
-      return await AnnonceService.addReponse(
-        annonceId,
-        questionId,
-        input.contenu,
-        context.user.id
-      );
     },
 
     createUser: async (_, { email, name, password, role }) => {
-      return await UserService.createUser({ email, name, password, role });
+      try {
+        const user = await UserService.createUser({ email, name, password, role });
+        return {
+          success: true,
+          message: "Utilisateur créé avec succès",
+          user
+        };
+      } catch (error) {
+        return {
+          success: false,
+          message: error.message,
+          user: null
+        };
+      }
+    }
+  },
+
+  Annonce: {
+    questions: async (parent) => {
+      return await AnnonceService.getQuestionsByAnnonceId(parent.id);
+    }
+  },
+
+  Question: {
+    reponses: async (parent) => {
+      return await AnnonceService.getReponsesByQuestionId(parent.id);
+    }
+  },
+
+  SearchResult: {
+    __resolveType(obj) {
+      if (obj.titre) {
+        return 'Annonce';
+      }
+      if (obj.email) {
+        return 'User';
+      }
+      return null;
     }
   }
 };
