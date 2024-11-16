@@ -34,13 +34,11 @@ async function verifyToken(req, res, next) {
   const operationName = getOperationName(req.body.query);
   const operationType = req.body.query.includes('mutation') ? 'mutations' : 'queries';
 
-  // Allow public operations
   if (PUBLIC_OPERATIONS[operationType]?.includes(operationName)) {
     next();
     return;
   }
 
-  // Verify token for protected operations
   const token = req.headers['authorization']?.split(' ')[1];
   if (!token) {
     res.status(403).json({
@@ -65,7 +63,6 @@ async function verifyToken(req, res, next) {
       });
     }
     
-    // Only reach this for database/other errors
     res.status(500).json({
       errors: [{
         message: 'Erreur lors de la récupération de l\'utilisateur',
