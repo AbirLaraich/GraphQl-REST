@@ -15,6 +15,8 @@ const path = require('path');
 const graphqlPlayground = require('graphql-playground-middleware-express').default;  
 const typeDefs = fs.readFileSync(path.join(__dirname, 'graphQl', 'schema.graphql'), 'utf-8');
 const resolvers = require('./graphQl/resolvers');
+const verifyToken = require('./middleware/verifyToken');
+const { graphqlHTTP } = require('express-graphql');
 
 require('dotenv').config();
 
@@ -61,12 +63,15 @@ const schema = makeExecutableSchema({
   resolvers,
 });
 
-app.use('/graphql', createHandler({
-  schema,
-  context: (req) => ({
-    user: req.context.user 
+app.use('/graphql',
+  verifyToken,
+  createHandler({
+    schema: schema,
+    context: (req) => ({
+      user: req.raw.user
+    })
   })
-}));
+);
 
 app.get('/playground', graphqlPlayground({
   endpoint: '/graphql' 
